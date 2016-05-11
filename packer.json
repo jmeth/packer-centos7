@@ -80,7 +80,7 @@
     {
       "type": "vagrant",
       "compression_level": 9,
-      "output": "jmeth-centos7.box"
+      "output": "build/jmeth-centos7.box"
     }
   ]
 }
