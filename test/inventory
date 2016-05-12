@@ -1,0 +1,5 @@
+controller ansible_connection=local
+node1 ansible_host=172.17.177.21 ansible_user=vagrant ansible_ssh_pass=vagrant
+
+[nodes]
+node1

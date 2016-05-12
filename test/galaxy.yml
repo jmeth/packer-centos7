@@ -1,0 +1,3 @@
+# Ansible galaxy roles
+#
+- src: DavidWittman.redis

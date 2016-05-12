@@ -1,0 +1,9 @@
+---
+- hosts: nodes
+  vars:
+  - redis_bind: 127.0.0.1
+  roles:
+  - DavidWittman.redis
+  tasks:
+  - name: install apache
+    yum: name=httpd state=latest

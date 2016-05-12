@@ -1,7 +1,46 @@
 Vagrant.configure(2) do |config|
+  #vagrant box
   config.vm.box = "jmeth-centos7-qemu"
   config.vm.box_url = "file://../build/jmeth-centos7.box"
-  config.vm.hostname = "vagrant-kvm-test"
+  
+  #node1 is our target node for ansible install
+  config.vm.define "node1" do |node|
+    node.vm.hostname = "node1"
+    node.vm.network "private_network", ip: "172.17.177.21"
+  end
+
+  #controller is our bootstrap node that runs ansible across other nodes in this Vagrantfile
+  config.vm.define "controller" do |node|
+    node.vm.hostname = "controller"
+
+    #use a private network to run ansible. this way we can statically configure IPs and inventory files
+    node.vm.network "private_network", ip: "172.17.177.11"
+    node.vm.synced_folder ".", "/vagrant", type: "rsync", rsync__auto: true
+
+    #need to install sshpass if we're going to rely on ansible_ssh_pass
+    node.vm.provision "shell" do |s|
+      s.inline = 'sudo yum -y install sshpass'
+    end
+
+    #ugly hack to fix vagrant 1.8.1 not being able to see ansible 2 [see https://github.com/mitchellh/vagrant/issues/6793]
+    node.vm.provision "shell" do |s|
+      s.inline = '[[ ! -f $1 ]] || grep -F -q "$2" $1 || sed -i "/__main__/a \\    $2" $1'
+      s.args = ['/usr/bin/ansible-galaxy', "if sys.argv == ['/usr/bin/ansible-galaxy', '--help']: sys.argv.insert(1, 'info')"]
+    end
+
+    #run the actual ansible provisioning
+    node.vm.provision :ansible_local do |ansible|
+      ansible.playbook = "site.yml"
+      #ansible.verbose = true
+      ansible.sudo = true
+      ansible.install = true
+      ansible.limit = "nodes"
+      ansible.inventory_path = "inventory"
+      ansible.galaxy_role_file = "galaxy.yml"
+      ansible.galaxy_roles_path = "./roles"
+    end
+  end
+
   config.vm.provider :libvirt do |libvirt|
     libvirt.nested = true
     libvirt.driver = "kvm"
