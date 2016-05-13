@@ -40,7 +40,7 @@
       "ssh_password": "vagrant",
       "ssh_username": "vagrant",
       "ssh_wait_timeout": "50000s",
-      "headless": "false",
+      "headless": "true",
       "accelerator": "kvm",
       "net_device": "virtio-net",
       "disk_interface": "virtio",
